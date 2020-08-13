@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Aqui no tenemos Linear Layout. To do el espacio lo ocupa un FrameLayout para fragmentos -->
+<!-- FrameLayout: indica que el espacio sera un contenedor de fragmentos pues el espacio se reutilizara para diferentes vistas -->
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+</FrameLayout>

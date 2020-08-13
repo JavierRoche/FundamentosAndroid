@@ -1,0 +1,27 @@
+package io.keepcoding.eh_ho
+
+import io.keepcoding.eh_ho.data.SignUpModel
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class SignUpModelTest {
+    @Test
+    fun toJson_isCorrect() {
+        val model = SignUpModel(
+            "test",
+            "test@test.com",
+            "12345678"
+        )
+        // Obtenemos el JSON con nuestro metodo...
+        val json = model.toJson()
+        // ... y comprobamos cada parte del JSON
+        assertEquals("test", json.get("name"))
+        assertEquals("test", json.get("username"))
+        assertEquals("test@test.com", json.get("email"))
+        assertEquals("12345678", json.get("password"))
+        assertEquals(true, json.get("active"))
+        assertEquals(true, json.get("approved"))
+
+
+    }
+}
