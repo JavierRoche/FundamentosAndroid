@@ -21,4 +21,11 @@
         android:layout_marginRight="32dp"
         android:layout_marginBottom="32dp"
         app:srcCompat="@drawable/ic_add"/>
+
+    <!-- Con include apilamos un archivo de layout en el FrameLayout que contendra los fragmentos -->
+
+    <include
+        android:id="@+id/viewLoading"
+        layout="@layout/view_loading"
+        android:visibility="visible"/>
 </FrameLayout>

@@ -2,11 +2,13 @@ package io.keepcoding.eh_ho.topics
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import io.keepcoding.eh_ho.*
 import io.keepcoding.eh_ho.data.Topic
 import io.keepcoding.eh_ho.data.UserRepo
 import io.keepcoding.eh_ho.login.LoginActivity
+import kotlinx.android.synthetic.main.activity_login.*
 
 const val TRANSACTION_CREATE_TOPIC = "create_topic"
 
@@ -66,6 +68,7 @@ class TopicsActivity : AppCompatActivity(), TopicsFragment.TopicsInteractionList
 
     // Sobreescritura del metodo que controla que ha habido un error al cargar los topics
     override fun loadingTopicsError() {
+        // Mostramos el fragmento de feedback al usuario que posibilita la recarga
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, TopicsFragmentRetry())
             .commit()

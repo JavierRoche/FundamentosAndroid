@@ -10,6 +10,10 @@ import io.keepcoding.eh_ho.R
 import io.keepcoding.eh_ho.data.Topic
 import io.keepcoding.eh_ho.data.TopicsRepo
 import io.keepcoding.eh_ho.inflate
+import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.activity_login.fragmentContainer
+import kotlinx.android.synthetic.main.activity_login.viewLoading
+import kotlinx.android.synthetic.main.activity_topics.*
 import kotlinx.android.synthetic.main.fragment_topics.*
 
 class TopicsFragment: Fragment() {
@@ -94,9 +98,16 @@ class TopicsFragment: Fragment() {
         context?.let {
             TopicsRepo.getTopics(it.applicationContext,
                 {
+                    // Ocultamos la vista de Loading que se muestra al arrancar el fragmento
+                    viewLoading.visibility = View.INVISIBLE
+
+                    // Rellenamos el ViewHolder con la lista de topics
                     (listTopics.adapter as TopicsAdapter).setTopics(it)
                 },
                 {
+                    // Ocultamos la vista de Loading que se muestra al arrancar el fragmento
+                    viewLoading.visibility = View.INVISIBLE
+
                     // Devolvemos a la actividad el control sobre el error
                     topicsInteractionListener?.loadingTopicsError()
                 }
