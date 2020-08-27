@@ -27,7 +27,7 @@ data class SignUpModel (
     }
 }
 
-// MOdelo de datos para el posteo de un topic
+// Modelo de datos para creacion de un nuevo topic
 data class CreateTopicModel(
     val title: String,
     val content: String
@@ -35,6 +35,18 @@ data class CreateTopicModel(
     fun toJson(): JSONObject {
         return JSONObject()
             .put("title", title)
+            .put("raw", content)
+    }
+}
+
+// Modelo de datos para creacion de un nuevo post
+data class AddPostModel(
+    val topicId: String,
+    val content: String
+) {
+    fun toJson(): JSONObject {
+        return JSONObject()
+            .put("topic_id", topicId)
             .put("raw", content)
     }
 }

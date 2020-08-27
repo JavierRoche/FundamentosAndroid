@@ -55,4 +55,5 @@
     <string name="error_duplicated_topic">Title has been already used</string>
     <string name="label_creating_topic">Creating topic</string>
     <string name="Opps">Opps something bad happened</string>
+    <string name="Reply">Reply</string>
 </resources>

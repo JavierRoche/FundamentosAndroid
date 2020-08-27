@@ -109,3 +109,45 @@ data class Topic(
         return TimeOffSet(0, Calendar.MINUTE)
     }
 }
+
+
+data class Post(
+    val author: String,
+    val content: String,
+    val postDate: Date = Date()
+){
+
+    // Añadimos un metodo que convierta objetos de JSON a Post
+    // Los metodos aqui incluidos estan declarados en un contexto estatico
+    companion object {
+        fun parsePostsList(response: JSONObject): List<Post> {
+            val objectList = response.getJSONObject("post_stream")
+                // Accedemos al array de topics con ...
+                .getJSONArray("posts")
+
+            val posts = mutableListOf<Post>()
+            // Iteramos los topics
+            for (i in 0 until objectList.length()) {
+                val parsedPost = parsePost(objectList.getJSONObject(i))
+                posts.add(parsedPost)
+            }
+
+            return posts
+        }
+
+        fun parsePost(jsonObject: JSONObject): Post {
+            // La fecha recuperada en "created_at" viene como 2020-06-21T00:00:00:000Z
+            // Para pasarla a nuestro formato necesitamos lo siguiente:
+            val date = jsonObject.getString("created_at")
+                .replace("Z", "+0000")
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
+            val dateFormatted = dateFormat.parse(date) ?: Date()
+
+            return Post(
+                author = jsonObject.getString("username").toString(),
+                content = jsonObject.getString("cooked").toString(),
+                postDate = Date()
+            )
+        }
+    }
+}

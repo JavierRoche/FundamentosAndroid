@@ -1,8 +1,6 @@
 package io.keepcoding.eh_ho.data
 
-import android.app.DownloadManager
 import android.content.Context
-import android.util.Log
 import com.android.volley.NetworkError
 import com.android.volley.Request
 import com.android.volley.ServerError
@@ -10,25 +8,22 @@ import com.android.volley.toolbox.JsonObjectRequest
 import io.keepcoding.eh_ho.R
 import org.json.JSONObject
 
-object TopicsRepo {
-    val topics: MutableList<Topic> = mutableListOf()
-//    get() {
-//        if (field.isEmpty())
-//            field.addAll(createDummyTopics())
-//        return field
-//    }
+// Patron Singleton para crear un solo objeto de esta clase
+object PostsRepo {
+    val posts: MutableList<Post> = mutableListOf()
 
-    fun getTopics(
+    fun getPosts(
+        topicId: String,
         context: Context,
-        onSuccess: (List<Topic>) -> Unit,
+        onSuccess: (List<Post>) -> Unit,
         onError: (RequestError) -> Unit
     ) {
         val request = JsonObjectRequest(
             Request.Method.GET,
-            ApiRoutes.getTopics(),
+            ApiRoutes.getPostsOfTopic(topicId),
             null,
             {
-                val list = Topic.parseTopicsList(it)
+                val list = Post.parsePostsList(it)
                 onSuccess(list)
             },
             {
@@ -46,34 +41,21 @@ object TopicsRepo {
         ApiRequestQueue.getRequestQueue(context).add(request)
     }
 
-    // Mediante este metodo podemos recuperar la informacion de un elemento desde cualquier punto de la app, pasandole el identificador del mismo
-    // El operador .find itera sobre los datos y realiza una tarea sobre ellos
-    fun getTopic(id: String): Topic? = topics.find {
-        it.id == id
-    }
-
-//    fun createDummyTopics(count: Int = 20): List<Topic> =
-//        (0..count).map {
-//            Topic(
-//                title = "Title $it"
-//            )
-//        }
-
-    // Metodo para crear un topic y añadirlo a nuestra coleccion
-    fun  addTopic(
+    // Metodo para añadir un post a un topic existente
+    fun addPost(
         context: Context,
-        model: CreateTopicModel,
-        onSuccess: (CreateTopicModel) -> Unit,
+        model: AddPostModel,
+        onSuccess: (AddPostModel) -> Unit,
         onError: (RequestError) -> Unit
     ) {
-        // Para hacer la peticion a Discourse
-        // Primero accedemos a las SharedReferences que es donde esta guardado el username
+        // Formamos la peticion para acceder al endpoint
+        // Accedemos a las SharedReferences que es donde esta guardado el username
         val username = UserRepo.getUsername(context)
         val request = PostRequest(
             // Indicamos el metodo
             Request.Method.POST,
             // Indicamos la ruta
-            ApiRoutes.createTopic(),
+            ApiRoutes.createPost(),
             // Indicamos el body de la peticion
             model.toJson(),
             {

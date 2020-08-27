@@ -2,13 +2,14 @@ package io.keepcoding.eh_ho.topics
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import io.keepcoding.eh_ho.*
 import io.keepcoding.eh_ho.data.Topic
 import io.keepcoding.eh_ho.data.UserRepo
 import io.keepcoding.eh_ho.login.LoginActivity
-import kotlinx.android.synthetic.main.activity_login.*
+import io.keepcoding.eh_ho.posts.EXTRA_TOPIC_ID
+import io.keepcoding.eh_ho.posts.EXTRA_TOPIC_TITLE
+import io.keepcoding.eh_ho.posts.PostsActivity
 
 const val TRANSACTION_CREATE_TOPIC = "create_topic"
 
@@ -52,7 +53,12 @@ class TopicsActivity : AppCompatActivity(), TopicsFragment.TopicsInteractionList
 
     // Metodo abstracto definido como protocolo en el fragmento para ver detalle del topic
     override fun onShowPosts(topic: Topic) {
-        goToPosts(topic)
+        // Declaramos el Intent y le pasamos el contexto de la actividad y la actividad a donde hay que ir
+        val intent = Intent(this, PostsActivity::class.java)
+        // Mediante el putExtra podemos pasar informacion a la siguiente actividad
+        intent.putExtra(EXTRA_TOPIC_ID, topic.id)
+        intent.putExtra(EXTRA_TOPIC_TITLE, topic.title)
+        startActivity(intent)
     }
 
     // Sobreescritura del metodo de Logout
@@ -74,6 +80,7 @@ class TopicsActivity : AppCompatActivity(), TopicsFragment.TopicsInteractionList
             .commit()
     }
 
+    // Si el usuario pulsa en reintentar se vuelve a lanzar el segmento que carga la lista de topics
     override fun onRetry() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, TopicsFragment())
@@ -85,19 +92,5 @@ class TopicsActivity : AppCompatActivity(), TopicsFragment.TopicsInteractionList
     override fun onTopicCreated() {
         // Conseguimos que al darle a enviar el topic y crearse volvamos a la lista de topics, quitando de la pila el fragmento de creacion
         supportFragmentManager.popBackStack()
-    }
-
-
-    /**
-     * PRIVATE FUNCTIONS
-     */
-
-    // Metodo que nos llevara al detale del topic, que sera una nueva actividad
-    private fun goToPosts(topic: Topic) {
-        // Declaramos el Intent y le pasamos el contexto de la actividad y la actividad a donde hay que ir
-        val intent = Intent(this, PostsActivity::class.java)
-        // Mediante el putExtra podemos pasar informacion a la siguiente actividad
-        intent.putExtra(EXTRA_TOPIC_ID, topic.id)
-        startActivity(intent)
     }
 }

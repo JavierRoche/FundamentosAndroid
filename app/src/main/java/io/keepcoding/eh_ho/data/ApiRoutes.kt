@@ -34,6 +34,21 @@ object ApiRoutes {
             .build()
             .toString()
 
+    // Nos devuelve una ruta para la recuperacion de los posts de un topic
+    fun getPostsOfTopic(topicId: String) =
+        uriBuilder()
+            .appendPath("t")
+            .appendPath("${topicId}.json")
+            .build()
+            .toString()
+
+    // Nos devuelve una ruta para la creacion de posts
+    fun createPost() =
+        uriBuilder()
+            .appendPath("posts.json")
+            .build()
+            .toString()
+
     // El uriBuilder no es mas que un constructor de rutas a los backend
     private fun uriBuilder() =
         Uri.Builder()

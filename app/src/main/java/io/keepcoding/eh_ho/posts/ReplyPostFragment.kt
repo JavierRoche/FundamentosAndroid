@@ -1,38 +1,34 @@
-package io.keepcoding.eh_ho.topics
+package io.keepcoding.eh_ho.posts
 
 import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
-import io.keepcoding.eh_ho.LoadingDialogFragment
 import io.keepcoding.eh_ho.R
-import io.keepcoding.eh_ho.data.CreateTopicModel
+import io.keepcoding.eh_ho.data.AddPostModel
+import io.keepcoding.eh_ho.data.PostsRepo
 import io.keepcoding.eh_ho.data.RequestError
-import io.keepcoding.eh_ho.data.TopicsRepo
 import io.keepcoding.eh_ho.inflate
+import io.keepcoding.eh_ho.topics.CreateTopicFragment
 import kotlinx.android.synthetic.main.fragment_create_topic.*
+import kotlinx.android.synthetic.main.fragment_create_topic.container
+import kotlinx.android.synthetic.main.fragment_create_topic.inputContent
+import kotlinx.android.synthetic.main.fragment_reply_post.*
 
-const val TAG_LOADING_DIALOG = "loading_dialog"
-
-class CreateTopicFragment: Fragment() {
+class ReplyPostFragment(private val topicId: String, private val topicTitle: String): Fragment() {
+    //var topicId: String = topicId
+    //var topicTitle: String = topicTitle
     // Variable para la comunicacion del listener
-    var interactionListener: CreateTopicInteractionListener? = null
-    // Cuadro de dialogo que se puede mostrar en el fragmento
-    val loadingDialogFragment: LoadingDialogFragment by lazy {
-        val message = getString(R.string.label_creating_topic)
-        // Para poder pasar argumentos al dialog en el constructor lo indicamos
-        LoadingDialogFragment.newInstance(message)
-    }
-
+    var interactionListener: ReplyPostInteractionListener? = null
 
     /**
      * PROTOCOLS
      */
 
     // Creamos una interface para comunicar eventos con la actividad
-    interface CreateTopicInteractionListener {
-        fun onTopicCreated()
+    interface ReplyPostInteractionListener {
+        fun onPostAdded()
     }
 
 
@@ -44,10 +40,10 @@ class CreateTopicFragment: Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        if (context is CreateTopicInteractionListener)
+        if (context is ReplyPostInteractionListener)
             this.interactionListener = context
         else
-            throw IllegalArgumentException("Context doesn't implement ${CreateTopicInteractionListener::class.java.canonicalName}")
+            throw IllegalArgumentException("Context doesn't implement ${CreateTopicFragment.CreateTopicInteractionListener::class.java.canonicalName}")
     }
 
     // Ejecuta mientras se esta creando la instancia del fragmento
@@ -59,7 +55,7 @@ class CreateTopicFragment: Fragment() {
     // Ejecuta si se ha invocado previamente el metodo setHasOptionsMenu
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         // Con ayuda del Inflater de menus que me llega inflamos el menu
-        inflater.inflate(R.menu.menu_create_topic, menu)
+        inflater.inflate(R.menu.menu_add_post, menu)
 
         // Invocamos el comportamiento por defecto siempre despues de inflar el menu
         super.onCreateOptionsMenu(menu, inflater)
@@ -67,9 +63,15 @@ class CreateTopicFragment: Fragment() {
 
     // Ejecuta una vez se ha creado la instancia del fragmento
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_create_topic, container, false)
+        return inflater.inflate(R.layout.fragment_reply_post, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Damos informacion del topic al que se esta añadiendo un post
+        topicInfo.text = "Topic ${topicId}: ${topicTitle}"
+    }
 
     /**
      * MENU USER ACTIONS
@@ -79,7 +81,7 @@ class CreateTopicFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Recorremos los elementos del menu y valoramos
         when (item.itemId) {
-            R.id.action_send -> createTopic()
+            R.id.action_add -> addPost()
         }
 
         return super.onOptionsItemSelected(item)
@@ -90,35 +92,25 @@ class CreateTopicFragment: Fragment() {
      * PRIVATE FUNCTIONS
      */
 
-    // Metodo que creara el topic
-    private fun createTopic() {
+    // Metodo que añadira el post
+    private fun addPost() {
         if (isValidForm()) {
-            // Mostramos el dialogo de loading indicando quien sera el manejador de fragmentos
-            fragmentManager?.let {
-                loadingDialogFragment.show(it, TAG_LOADING_DIALOG)
-            }
-
-            // Creamos el modelo de alta de topic
-            val model = CreateTopicModel(
-                title = inputTitle.text.toString(),
+            // Creamos el modelo de alta del topic
+            val model = AddPostModel(
+                topicId = topicId,
                 content = inputContent.text.toString()
             )
 
             // Accedemos al repo donde esta nuestra estructura de datos para añadir el nuevo topic previa validacion del contexto
             context?.let {
-                TopicsRepo.addTopic(
+                PostsRepo.addPost(
                     it.applicationContext,
                     model,
                     {
-                        // Ocultamos el dialogo de loading del fragmento
-                        loadingDialogFragment.dismiss()
-                        // Informamos a la actividad que la creacion del topic ha terminado mediante el interactionListener
-                        interactionListener?.onTopicCreated()
+                        // Informamos a la actividad que la creacion del post ha terminado mediante el interactionListener
+                        interactionListener?.onPostAdded()
                     },
                     {
-                        // Ocultamos el dialogo de loading del fragmento
-                        loadingDialogFragment.dismiss()
-
                         handleError(it)
                     }
                 )
@@ -142,12 +134,10 @@ class CreateTopicFragment: Fragment() {
     }
 
     // Funcion inline para limpieza y comprension de codigo
-    private fun isValidForm() = inputTitle.text.isNotEmpty() && inputContent.text.isNotEmpty()
+    private fun isValidForm() = inputContent.text.isNotEmpty()
 
     // Metodo para mostrar errores en las cajas de texto cuando esten vacias
     private fun showErrors() {
-        if (inputTitle.text.isEmpty())
-            inputTitle.error = getString(R.string.error_empty)
         if (inputContent.text.isEmpty())
             inputContent.error = getString(R.string.error_empty)
     }
