@@ -1,41 +1,49 @@
-package io.keepcoding.eh_ho.data
+package io.keepcoding.eh_ho.data.repos
 
-import android.app.DownloadManager
 import android.content.Context
-import android.util.Log
 import com.android.volley.NetworkError
 import com.android.volley.Request
 import com.android.volley.ServerError
 import com.android.volley.toolbox.JsonObjectRequest
 import io.keepcoding.eh_ho.R
+import io.keepcoding.eh_ho.data.*
+import io.keepcoding.eh_ho.data.api.*
 import org.json.JSONObject
 
-object TopicsRepo {
-    val topics: MutableList<Topic> = mutableListOf()
-//    get() {
-//        if (field.isEmpty())
-//            field.addAll(createDummyTopics())
-//        return field
-//    }
+// Object estatico para la lista de posts
+object PostsRepo {
+    val posts: MutableList<Post> = mutableListOf()
 
-    fun getTopics(
+    // Metodo que prepara y lanza la peticion al servidor para recuperar los post de un topic
+    fun getPosts(
+        topicId: String,
         context: Context,
-        onSuccess: (List<Topic>) -> Unit,
+        onSuccess: (List<Post>) -> Unit,
         onError: (RequestError) -> Unit
     ) {
+        // Formamos la request
         val request = JsonObjectRequest(
             Request.Method.GET,
-            ApiRoutes.getTopics(),
+            ApiRoutes.getPostsOfTopic(topicId),
+            // El body va vacio por ser un GET
             null,
+            // Indicamos el listener para el success
             {
-                val list = Topic.parseTopicsList(it)
+                val list =
+                    Post.parsePostsList(it)
                 onSuccess(list)
             },
+            // Indicamos el listener para el error
             {
                 it.printStackTrace()
+
+                // Valoramos el tipo de error Volley
                 val requestError =
                     if (it is NetworkError)
-                        RequestError(it, messageResId = R.string.error_no_internet)
+                        RequestError(
+                            it,
+                            messageResId = R.string.error_no_internet
+                        )
                     else
                         RequestError(it)
                 onError(requestError)
@@ -46,35 +54,20 @@ object TopicsRepo {
         ApiRequestQueue.getRequestQueue(context).add(request)
     }
 
-    // Mediante este metodo podemos recuperar la informacion de un elemento desde cualquier punto de la app, pasandole el identificador del mismo
-    // El operador .find itera sobre los datos y realiza una tarea sobre ellos
-    fun getTopic(id: String): Topic? = topics.find {
-        it.id == id
-    }
-
-//    fun createDummyTopics(count: Int = 20): List<Topic> =
-//        (0..count).map {
-//            Topic(
-//                title = "Title $it"
-//            )
-//        }
-
-    // Metodo para crear un topic y añadirlo a nuestra coleccion
-    fun  addTopic(
+    // Metodo que prepara y lanza la peticion al servidor para añadir un post a un topic
+    fun addPost(
         context: Context,
-        model: CreateTopicModel,
-        onSuccess: (CreateTopicModel) -> Unit,
+        model: AddPostModel,
+        onSuccess: (AddPostModel) -> Unit,
         onError: (RequestError) -> Unit
     ) {
-        // Para hacer la peticion a Discourse
-        // Primero accedemos a las SharedReferences que es donde esta guardado el username
+        // Accedemos a las SharedReferences para recuperear el username necesario en la peticion
         val username = UserRepo.getUsername(context)
+
+        // Formamos la request
         val request = PostRequest(
-            // Indicamos el metodo
             Request.Method.POST,
-            // Indicamos la ruta
-            ApiRoutes.createTopic(),
-            // Indicamos el body de la peticion
+            ApiRoutes.createPost(),
             model.toJson(),
             {
                 onSuccess(model)
@@ -84,7 +77,7 @@ object TopicsRepo {
 
                 val requestError =
                     if (it is ServerError && it.networkResponse.statusCode == 422) {
-                        // Vamos a obtener el body de la respuesta para mostrar un mensaje exacto
+                        // Obtenemos el body de la respuesta para mostrar un mensaje exacto
                         val body = String(it.networkResponse.data, Charsets.UTF_8)
                         val jsonError = JSONObject(body)
                         val errors = jsonError.getJSONArray("errors")
@@ -93,10 +86,16 @@ object TopicsRepo {
                         for (i in 0 until errors.length()) {
                             errorMessage += "${errors[i]} "
                         }
-                        RequestError(it, message = errorMessage)
+                        RequestError(
+                            it,
+                            message = errorMessage
+                        )
 
                     } else if (it is NetworkError)
-                        RequestError(it, messageResId = R.string.error_no_internet)
+                        RequestError(
+                            it,
+                            messageResId = R.string.error_no_internet
+                        )
                     else
                         RequestError(it)
 

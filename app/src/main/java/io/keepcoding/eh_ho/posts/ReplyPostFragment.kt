@@ -6,12 +6,10 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import io.keepcoding.eh_ho.R
-import io.keepcoding.eh_ho.data.AddPostModel
-import io.keepcoding.eh_ho.data.PostsRepo
-import io.keepcoding.eh_ho.data.RequestError
-import io.keepcoding.eh_ho.inflate
+import io.keepcoding.eh_ho.data.api.AddPostModel
+import io.keepcoding.eh_ho.data.repos.PostsRepo
+import io.keepcoding.eh_ho.data.api.RequestError
 import io.keepcoding.eh_ho.topics.CreateTopicFragment
-import kotlinx.android.synthetic.main.fragment_create_topic.*
 import kotlinx.android.synthetic.main.fragment_create_topic.container
 import kotlinx.android.synthetic.main.fragment_create_topic.inputContent
 import kotlinx.android.synthetic.main.fragment_reply_post.*
@@ -70,7 +68,7 @@ class ReplyPostFragment(private val topicId: String, private val topicTitle: Str
         super.onViewCreated(view, savedInstanceState)
 
         // Damos informacion del topic al que se esta añadiendo un post
-        topicInfo.text = "Topic ${topicId}: ${topicTitle}"
+        topicInfo.text = "Topic $topicId: $topicTitle"
     }
 
     /**
@@ -110,7 +108,7 @@ class ReplyPostFragment(private val topicId: String, private val topicTitle: Str
                         // Informamos a la actividad que la creacion del post ha terminado mediante el interactionListener
                         interactionListener?.onPostAdded()
                     },
-                    {
+                    { it ->
                         handleError(it)
                     }
                 )
@@ -123,12 +121,14 @@ class ReplyPostFragment(private val topicId: String, private val topicTitle: Str
 
     private fun handleError(error: RequestError) {
         val message =
-            if (error.messageResId != null)
-                getString(error.messageResId)
-            else if (error.message != null)
-                error.message
-            else
-                getString(R.string.error_default)
+            when {
+                error.messageResId != null ->
+                    getString(error.messageResId)
+                error.message != null ->
+                    error.message
+                else ->
+                    getString(R.string.error_default)
+            }
 
         Snackbar.make(container, message, Snackbar.LENGTH_LONG).show()
     }

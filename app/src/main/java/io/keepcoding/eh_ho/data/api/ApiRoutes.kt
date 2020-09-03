@@ -1,11 +1,11 @@
-package io.keepcoding.eh_ho.data
+package io.keepcoding.eh_ho.data.api
 
 import android.net.Uri
 import io.keepcoding.eh_ho.BuildConfig
 
-// Este modulo sirve para crear rutas estaticas accesibles desde to do el proyecto
+// Object estatico para obtener los endpoints al servidor de Discourse
 object ApiRoutes {
-    // Nos devuelve la ruta para el logueo
+    // Ruta para el logueo: https://mdiscourse.keepcoding.io/users/{username}.json
     fun signIn(username: String) =
         uriBuilder()
             .appendPath("users")
@@ -13,28 +13,28 @@ object ApiRoutes {
             .build()
             .toString()
 
-    // Nos devuelve la ruta del alta de usuario
+    // Ruta del alta de usuario: https://mdiscourse.keepcoding.io/users
     fun signUp() =
         uriBuilder()
             .appendPath("users")
             .build()
             .toString()
 
-    // Nos devuelve la ruta para la recuperacion de los latest topics
+    // Ruta de recuperacion de latest topics: https://mdiscourse.keepcoding.io/latest.json
     fun getTopics() =
         uriBuilder()
             .appendPath("latest.json")
             .build()
             .toString()
 
-    // Nos devuelve una ruta para la creacion de topics
+    // Ruta de creacion de topics: https://mdiscourse.keepcoding.io/posts.json
     fun createTopic() =
         uriBuilder()
             .appendPath("posts.json")
             .build()
             .toString()
 
-    // Nos devuelve una ruta para la recuperacion de los posts de un topic
+    // Ruta de recuperacion de los posts de un topic: https://mdiscourse.keepcoding.io/t/{topicId}.json
     fun getPostsOfTopic(topicId: String) =
         uriBuilder()
             .appendPath("t")
@@ -42,14 +42,14 @@ object ApiRoutes {
             .build()
             .toString()
 
-    // Nos devuelve una ruta para la creacion de posts
+    // Ruta de creacion de posts: https://mdiscourse.keepcoding.io/posts.json
     fun createPost() =
         uriBuilder()
             .appendPath("posts.json")
             .build()
             .toString()
 
-    // El uriBuilder no es mas que un constructor de rutas a los backend
+    // El constructor de rutas a los endpoints que contiene el domino: https://mdiscourse.keepcoding.io
     private fun uriBuilder() =
         Uri.Builder()
             .scheme("https")

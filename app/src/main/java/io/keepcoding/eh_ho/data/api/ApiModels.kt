@@ -1,9 +1,8 @@
-package io.keepcoding.eh_ho.data
+package io.keepcoding.eh_ho.data.api
 
-import android.icu.text.CaseMap
 import org.json.JSONObject
 
-// Creamos una data class para el modelo de datos de usuario
+// Modelo de datos de login de usuario
 data class SignInModel(
     val username: String,
     val password: String
@@ -15,7 +14,7 @@ data class SignUpModel (
     val email: String,
     val password: String
 ) {
-    // Definimos un metodo para la data class que nos devolvera un JSON que pasaremos en la request de alta de usuario en Discourse
+    // Metodo que transforma a JSONObject para una request los datos de alta de usuario en Discourse
     fun toJson(): JSONObject {
         return JSONObject()
             .put("name", username)  // {"name": "username"}
@@ -27,11 +26,12 @@ data class SignUpModel (
     }
 }
 
-// Modelo de datos para creacion de un nuevo topic
+// Modelo de datos para la creacion de un nuevo topic
 data class CreateTopicModel(
     val title: String,
     val content: String
 ) {
+    // Metodo que transforma a JSONObject para una request los datos de un nuevo topic
     fun toJson(): JSONObject {
         return JSONObject()
             .put("title", title)
@@ -44,6 +44,7 @@ data class AddPostModel(
     val topicId: String,
     val content: String
 ) {
+    // Metodo que transforma a JSONObject para una request los datos de un nuevo post
     fun toJson(): JSONObject {
         return JSONObject()
             .put("topic_id", topicId)

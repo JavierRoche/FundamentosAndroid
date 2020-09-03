@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,10 +8,24 @@
     android:layout_height="match_parent"
     tools:context=".topics.TopicsFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listTopics"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listTopics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <!-- Con include apilamos un archivo de layout en el FrameLayout que contendra los fragmentos -->
+
+        <include
+            android:id="@+id/viewLoading"
+            layout="@layout/view_loading"
+            android:visibility="visible"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/buttonCreate"
@@ -20,12 +35,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginRight="32dp"
         android:layout_marginBottom="32dp"
-        app:srcCompat="@drawable/ic_add"/>
-
-    <!-- Con include apilamos un archivo de layout en el FrameLayout que contendra los fragmentos -->
-
-    <include
-        android:id="@+id/viewLoading"
-        layout="@layout/view_loading"
-        android:visibility="visible"/>
-</FrameLayout>
+        app:backgroundTint="#6A1B9A"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+        app:srcCompat="@drawable/ic_add" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -4,21 +4,19 @@ import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.keepcoding.eh_ho.R
 import io.keepcoding.eh_ho.data.Topic
-import io.keepcoding.eh_ho.data.TopicsRepo
+import io.keepcoding.eh_ho.data.repos.TopicsRepo
 import io.keepcoding.eh_ho.inflate
-import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.activity_login.fragmentContainer
 import kotlinx.android.synthetic.main.activity_login.viewLoading
-import kotlinx.android.synthetic.main.activity_topics.*
 import kotlinx.android.synthetic.main.fragment_topics.*
 
 class TopicsFragment: Fragment() {
     // Definimos una instancia del protocolo InteractionListener, que recogera los eventos de usuario sobre el fragmento
-    var topicsInteractionListener: TopicsInteractionListener? = null
+    private var topicsInteractionListener: TopicsInteractionListener? = null
+    var swipeRefreshLayout: SwipeRefreshLayout? = null
 
     /**
      * PROTOCOLS
@@ -51,6 +49,7 @@ class TopicsFragment: Fragment() {
     // Ejecuta mientras se esta creando la instancia del fragmento
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         // Fuerza la ejecucion de onCreateOptionsMenu indicando que habra un menu en el fragmento
         setHasOptionsMenu(true)
     }
@@ -71,6 +70,12 @@ class TopicsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefresh)
+        swipeRefreshLayout?.setOnRefreshListener{
+            // Cargamos los topics
+            loadTopics()
+        }
+
         // Creamos el adaptador que le dira al fragmento que hacer cuando se le de a un elemento de la lista
         val adapter = TopicsAdapter {
             this.topicsInteractionListener?.onShowPosts(it)
@@ -86,7 +91,7 @@ class TopicsFragment: Fragment() {
         // El LayoutManager es el componente que decide como se van a distribuir los elementos en el ReciclerView
         listTopics.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         // Añade una linea horizontal que divide cada topic
-        listTopics.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        //listTopics.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         // Asigna el adaptador que se encarga de transformar los datos en vistas y presentarlas en el ReciclerView
         listTopics.adapter = adapter
     }
@@ -94,25 +99,8 @@ class TopicsFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        // Accedemos al repositorio de topics con un context seguro
-        context?.let {
-            TopicsRepo.getTopics(it.applicationContext,
-                {
-                    // Ocultamos la vista de Loading que se muestra al arrancar el fragmento
-                    viewLoading.visibility = View.INVISIBLE
-
-                    // Rellenamos el ViewHolder con la lista de topics
-                    (listTopics.adapter as TopicsAdapter).setTopics(it)
-                },
-                {
-                    // Ocultamos la vista de Loading que se muestra al arrancar el fragmento
-                    viewLoading.visibility = View.INVISIBLE
-
-                    // Devolvemos a la actividad el control sobre el error
-                    topicsInteractionListener?.loadingTopicsError()
-                }
-            )
-        }
+        // Cargamos los topics
+        loadTopics()
     }
 
     // Desliga el fragmento de su actividad
@@ -133,5 +121,38 @@ class TopicsFragment: Fragment() {
             R.id.action_logout -> this.topicsInteractionListener?.onLogout()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+
+    /**
+     * PRIVATE FUNCTIONS
+     */
+
+    private fun loadTopics() {
+        // Accedemos al repositorio de topics con un context seguro
+        context?.let { it ->
+            TopicsRepo.getTopics(it.applicationContext,
+                {
+                    // Ocultamos la vista de Loading que se muestra al arrancar el fragmento
+                    viewLoading.visibility = View.INVISIBLE
+
+                    // Rellenamos el ViewHolder con la lista de topics
+                    (listTopics.adapter as TopicsAdapter).setTopics(it)
+
+                    // Paramos el refrescado del SwipeRefresh
+                    swipeRefreshLayout!!.isRefreshing = false
+                },
+                {
+                    // Ocultamos la vista de Loading que se muestra al arrancar el fragmento
+                    viewLoading.visibility = View.INVISIBLE
+
+                    // Devolvemos a la actividad el control sobre el error
+                    topicsInteractionListener?.loadingTopicsError()
+
+                    // Paramos el refrescado del SwipeRefresh
+                    swipeRefreshLayout!!.isRefreshing = false
+                }
+            )
+        }
     }
 }

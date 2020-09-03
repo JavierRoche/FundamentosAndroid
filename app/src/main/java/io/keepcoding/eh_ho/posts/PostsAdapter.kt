@@ -9,34 +9,13 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import io.keepcoding.eh_ho.R
 import io.keepcoding.eh_ho.data.Post
-import io.keepcoding.eh_ho.data.Topic
 import io.keepcoding.eh_ho.inflate
 import kotlinx.android.synthetic.main.item_post.view.*
-import kotlinx.android.synthetic.main.item_topic.view.*
 
 
 class PostsAdapter: RecyclerView.Adapter<PostsAdapter.PostHolder>() {
     // Lista de elementos interna mutable para añadir o quitar elementos
     private val posts = mutableListOf<Post>()
-
-    // Clase que tiene la logica para el contenedor de la vista
-    // El constructor de la clase ViewHolder necesita la vista que tendra que administrar, asi que se lo pasaremos en el constructor
-    inner class PostHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        var post: Post? = null
-        // Asignamos
-        @RequiresApi(Build.VERSION_CODES.N)
-        set(value) {
-            field = value
-            // Al tag del elemento de la vista le indicamos cada elemento de celda
-            itemView.tag = field
-
-            field?.let {
-                itemView.postAuthor.text = it.author
-                itemView.postContent.text = Html.fromHtml(it.content, FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH)
-                itemView.postDate.text = it.postDate.toString()
-            }
-        }
-    }
 
     // Indicara el numero de elementos que habra en la lista accediendo a la estructura de datos
     override fun getItemCount(): Int {
@@ -59,7 +38,6 @@ class PostsAdapter: RecyclerView.Adapter<PostsAdapter.PostHolder>() {
         val post = posts[position]
         // El holder es el contenedor de la vista que se creo en el onCreateViewHolder
         holder.post = post
-        // TODO? listener
     }
 
     // Metodo que recibe la lista de topics que se van a mostrar
@@ -70,5 +48,29 @@ class PostsAdapter: RecyclerView.Adapter<PostsAdapter.PostHolder>() {
         this.posts.addAll(posts)
         // El adaptador vuelve a realizar el proceso de creacion de los ViewHolders
         notifyDataSetChanged()
+    }
+
+
+    /**
+     * VIEW HOLDER
+     */
+
+    // Clase que tiene la logica para el contenedor de la vista
+    // En el constructor de la clase ViewHolder pasamos la vista que tendra que administrar
+    inner class PostHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+        var post: Post? = null
+            // Asignamos
+            @RequiresApi(Build.VERSION_CODES.N)
+            set(value) {
+                field = value
+                // Al tag del elemento de la vista le indicamos cada elemento de celda
+                itemView.tag = field
+
+                field?.let {
+                    itemView.postAuthor.text = it.author
+                    itemView.postContent.text = Html.fromHtml(it.content, FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH)
+                    itemView.postDate.text = it.postDate
+                }
+            }
     }
 }

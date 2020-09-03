@@ -1,6 +1,5 @@
 package io.keepcoding.eh_ho.topics
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,13 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import io.keepcoding.eh_ho.R
-import io.keepcoding.eh_ho.data.Topic
 import io.keepcoding.eh_ho.inflate
 import kotlinx.android.synthetic.main.fragment_topics_retry.*
 
 class TopicsFragmentRetry: Fragment() {
     // Definimos una instancia del protocolo InteractionListener, que recogera los eventos de usuario sobre el fragmento
-    var topicsInteractionListener: TopicsRetryInteractionListener? = null
+    private var topicsInteractionListener: TopicsRetryInteractionListener? = null
 
     /**
      * PROTOCOLS

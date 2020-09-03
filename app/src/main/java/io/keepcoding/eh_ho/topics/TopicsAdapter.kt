@@ -15,7 +15,7 @@ import java.util.*
 // La clase abstracta RecyclerView.Adapter, devuelve un generico de la inner class que definiremos en cada Adapter. Sera como una plantilla y se llama ViewHolder
 // Tambien indicamos a la clase Adapter, que recibira un listener para controlar los clics en las celdas
 
-class TopicsAdapter(val topicClickListener: ((Topic) -> Unit)? = null) : RecyclerView.Adapter<TopicsAdapter.TopicHolder>() {
+class TopicsAdapter(private val topicClickListener: ((Topic) -> Unit)? = null) : RecyclerView.Adapter<TopicsAdapter.TopicHolder>() {
     // Lista de elementos interna mutable para añadir o quitar elementos
     private val topics = mutableListOf<Topic>()
 
@@ -62,6 +62,11 @@ class TopicsAdapter(val topicClickListener: ((Topic) -> Unit)? = null) : Recycle
         this.topics.addAll(topics)
         notifyDataSetChanged()
     }
+
+
+    /**
+     * VIEW HOLDER
+     */
 
     // La inner class hereda de ViewHolder y poder asi rellenar el contenedor de la vista
     inner class TopicHolder(itemView: View): RecyclerView.ViewHolder(itemView) {

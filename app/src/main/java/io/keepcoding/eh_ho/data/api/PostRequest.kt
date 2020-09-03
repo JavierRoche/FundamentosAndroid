@@ -1,11 +1,11 @@
-package io.keepcoding.eh_ho.data
+package io.keepcoding.eh_ho.data.api
 
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import io.keepcoding.eh_ho.BuildConfig
 import org.json.JSONObject
-import javax.xml.transform.ErrorListener
 
+// Clase que define una request a un API
 class PostRequest(
     method: Int,
     url: String,
@@ -16,15 +16,18 @@ class PostRequest(
     private val username: String? = null,
     private val useApiKey: Boolean = true
 ): JsonObjectRequest(method, url, body, listener, errorListener) {
+
+    // Metodo que devuelve los Headers que necesitan algunos accesos a los endpoints
     override fun getHeaders(): MutableMap<String, String> {
         val headers= mutableMapOf<String, String>()
         headers["Content-Type"] = "application/json"
         headers["Accept"] = "application/json"
 
+        // Si la request requiere ApiKey la informamos
         if (useApiKey)
             headers["Api-Key"] = BuildConfig.DiscourseApiKey
 
-        // Comprobamos si estamos en un POST de topic, en cuyo caso username no sera nulo
+        // Si la request requiere username (POST de topic), éste no sera nulo
         username?.let {
             headers["Api-Username"] = it
         }

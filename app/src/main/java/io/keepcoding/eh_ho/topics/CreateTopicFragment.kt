@@ -7,19 +7,18 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import io.keepcoding.eh_ho.LoadingDialogFragment
 import io.keepcoding.eh_ho.R
-import io.keepcoding.eh_ho.data.CreateTopicModel
-import io.keepcoding.eh_ho.data.RequestError
-import io.keepcoding.eh_ho.data.TopicsRepo
-import io.keepcoding.eh_ho.inflate
+import io.keepcoding.eh_ho.data.api.CreateTopicModel
+import io.keepcoding.eh_ho.data.api.RequestError
+import io.keepcoding.eh_ho.data.repos.TopicsRepo
 import kotlinx.android.synthetic.main.fragment_create_topic.*
 
 const val TAG_LOADING_DIALOG = "loading_dialog"
 
 class CreateTopicFragment: Fragment() {
     // Variable para la comunicacion del listener
-    var interactionListener: CreateTopicInteractionListener? = null
+    private var interactionListener: CreateTopicInteractionListener? = null
     // Cuadro de dialogo que se puede mostrar en el fragmento
-    val loadingDialogFragment: LoadingDialogFragment by lazy {
+    private val loadingDialogFragment: LoadingDialogFragment by lazy {
         val message = getString(R.string.label_creating_topic)
         // Para poder pasar argumentos al dialog en el constructor lo indicamos
         LoadingDialogFragment.newInstance(message)
@@ -115,7 +114,7 @@ class CreateTopicFragment: Fragment() {
                         // Informamos a la actividad que la creacion del topic ha terminado mediante el interactionListener
                         interactionListener?.onTopicCreated()
                     },
-                    {
+                    { it ->
                         // Ocultamos el dialogo de loading del fragmento
                         loadingDialogFragment.dismiss()
 
@@ -131,12 +130,14 @@ class CreateTopicFragment: Fragment() {
 
     private fun handleError(error: RequestError) {
         val message =
-            if (error.messageResId != null)
-                getString(error.messageResId)
-            else if (error.message != null)
-                error.message
-            else
-                getString(R.string.error_default)
+            when {
+                error.messageResId != null ->
+                    getString(error.messageResId)
+                error.message != null ->
+                    error.message
+                else ->
+                    getString(R.string.error_default)
+            }
 
         Snackbar.make(container, message, Snackbar.LENGTH_LONG).show()
     }

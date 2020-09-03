@@ -7,9 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import io.keepcoding.eh_ho.R
-import io.keepcoding.eh_ho.data.SignUpModel
+import io.keepcoding.eh_ho.data.api.SignUpModel
 import io.keepcoding.eh_ho.inflate
-import kotlinx.android.synthetic.main.fragment_sign_in.*
 import kotlinx.android.synthetic.main.fragment_sign_up.*
 import kotlinx.android.synthetic.main.fragment_sign_up.inputPassword
 import kotlinx.android.synthetic.main.fragment_sign_up.inputUsername
@@ -18,7 +17,7 @@ import kotlinx.android.synthetic.main.fragment_sign_up.labelCreateAccount
 // Las clases que heredan de Fragment es porque se van a utilizar en una actividad como fragmentos
 class SignUpFragment: Fragment() {
     // Definimos el InteractionListener que recogera los eventos de usuario sobre el fragmento
-    var signUpInteractionListener: SignUpInteractionListener? = null
+    private var signUpInteractionListener: SignUpInteractionListener? = null
 
 
     /**
@@ -40,6 +39,7 @@ class SignUpFragment: Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
+        // Comprobamos que el contexto de la actividad implementa el protocolo
         if (context is SignUpInteractionListener)
             signUpInteractionListener = context
         else

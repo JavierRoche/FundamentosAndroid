@@ -1,4 +1,4 @@
-package io.keepcoding.eh_ho.data
+package io.keepcoding.eh_ho.data.repos
 
 import android.content.Context
 import com.android.volley.NetworkError
@@ -6,31 +6,43 @@ import com.android.volley.Request
 import com.android.volley.ServerError
 import com.android.volley.toolbox.JsonObjectRequest
 import io.keepcoding.eh_ho.R
+import io.keepcoding.eh_ho.data.*
+import io.keepcoding.eh_ho.data.api.*
 import org.json.JSONObject
 
-// Patron Singleton para crear un solo objeto de esta clase
-object PostsRepo {
-    val posts: MutableList<Post> = mutableListOf()
+// Object estatico para la lista de topics
+object TopicsRepo {
+    val topics: MutableList<Topic> = mutableListOf()
 
-    fun getPosts(
-        topicId: String,
+    // Metodo que prepara y lanza la peticion al servidor para recuperar los topics
+    fun getTopics(
         context: Context,
-        onSuccess: (List<Post>) -> Unit,
+        onSuccess: (List<Topic>) -> Unit,
         onError: (RequestError) -> Unit
     ) {
+        // Formamos la request
         val request = JsonObjectRequest(
             Request.Method.GET,
-            ApiRoutes.getPostsOfTopic(topicId),
+            ApiRoutes.getTopics(),
+            // El body va vacio por ser un GET
             null,
+            // Indicamos el listener para el success
             {
-                val list = Post.parsePostsList(it)
+                val list =
+                    Topic.parseTopicsList(it)
                 onSuccess(list)
             },
+            // Indicamos el listener para el error
             {
                 it.printStackTrace()
+
+                // Valoramos el tipo de error Volley
                 val requestError =
                     if (it is NetworkError)
-                        RequestError(it, messageResId = R.string.error_no_internet)
+                        RequestError(
+                            it,
+                            messageResId = R.string.error_no_internet
+                        )
                     else
                         RequestError(it)
                 onError(requestError)
@@ -41,22 +53,21 @@ object PostsRepo {
         ApiRequestQueue.getRequestQueue(context).add(request)
     }
 
-    // Metodo para añadir un post a un topic existente
-    fun addPost(
+
+    // Metodo que prepara y lanza la peticion al servidor para añadir un topic a nuestra coleccion
+    fun  addTopic(
         context: Context,
-        model: AddPostModel,
-        onSuccess: (AddPostModel) -> Unit,
+        model: CreateTopicModel,
+        onSuccess: (CreateTopicModel) -> Unit,
         onError: (RequestError) -> Unit
     ) {
-        // Formamos la peticion para acceder al endpoint
-        // Accedemos a las SharedReferences que es donde esta guardado el username
+        // Accedemos a las SharedReferences para recuperear el username necesario en la peticion
         val username = UserRepo.getUsername(context)
+
+        // Formamos la request
         val request = PostRequest(
-            // Indicamos el metodo
             Request.Method.POST,
-            // Indicamos la ruta
-            ApiRoutes.createPost(),
-            // Indicamos el body de la peticion
+            ApiRoutes.createTopic(),
             model.toJson(),
             {
                 onSuccess(model)
@@ -75,10 +86,16 @@ object PostsRepo {
                         for (i in 0 until errors.length()) {
                             errorMessage += "${errors[i]} "
                         }
-                        RequestError(it, message = errorMessage)
+                        RequestError(
+                            it,
+                            message = errorMessage
+                        )
 
                     } else if (it is NetworkError)
-                        RequestError(it, messageResId = R.string.error_no_internet)
+                        RequestError(
+                            it,
+                            messageResId = R.string.error_no_internet
+                        )
                     else
                         RequestError(it)
 

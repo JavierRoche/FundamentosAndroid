@@ -7,15 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import io.keepcoding.eh_ho.R
-import io.keepcoding.eh_ho.data.SignInModel
+import io.keepcoding.eh_ho.data.api.SignInModel
 import io.keepcoding.eh_ho.inflate
-import kotlinx.android.synthetic.main.fragment_create_topic.*
 import kotlinx.android.synthetic.main.fragment_sign_in.*
 
 // Las clases que heredan de Fragment es porque se van a utilizar en una actividad como fragmentos
 class SignInFragment: Fragment() {
-    // Definimos una instancia del protocolo InteractionListener, que recogera los eventos de usuario sobre el fragmento
-    var signInInteractionListener: SignInInteractionListener? = null
+    // Definimos el InteractionListener que recogera los eventos de usuario sobre el fragmento
+    private var signInInteractionListener: SignInInteractionListener? = null
 
 
     /**

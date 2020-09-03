@@ -5,9 +5,10 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import io.keepcoding.eh_ho.R
-import io.keepcoding.eh_ho.data.PostsRepo
+import io.keepcoding.eh_ho.data.repos.PostsRepo
 import io.keepcoding.eh_ho.inflate
 import io.keepcoding.eh_ho.topics.TopicsFragment
 import kotlinx.android.synthetic.main.fragment_create_topic.*
@@ -17,15 +18,16 @@ const val ARG_TOPIC_ID = "topic_id"
 const val ARG_TOPIC_TITLE = "topic_title"
 
 class PostsTopicFragment: Fragment() {
-    var topicId: String = ""
-    var topicTitle: String = ""
+    private var topicId: String = ""
+    private var topicTitle: String = ""
     // Instancia del protocolo InteractionListener, que recogera los eventos de usuario sobre el fragmento
-    var topicInteractionListener: TopicInteractionListener? = null
+    private var topicInteractionListener: TopicInteractionListener? = null
+    private var swipeRefreshLayout: SwipeRefreshLayout? = null
+
 
     /**
      * STATIC INIT
      */
-
 
     // Este metodo estatico fija el argumento que le pasa la actividad
     companion object {
@@ -88,11 +90,18 @@ class PostsTopicFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Definimos el evento del elemento SwipeRefresh
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefresh)
+        swipeRefreshLayout?.setOnRefreshListener{
+            // Cargamos los posts
+            loadPosts()
+        }
+
         // Guardamos en la variable local el numero de topic que se pulso
         topicId = this.arguments?.getString(ARG_TOPIC_ID).toString()
         topicTitle = this.arguments?.getString(ARG_TOPIC_TITLE).toString()
-        println(topicId)
-        println(topicTitle)
+        // Fijamos el titulo del topic en la parte superior del fragmento
+        activity?.title = topicTitle
 
         // Obtenemos los posts del topic en el que se ha hecho tap
         // Creamos el objeto adaptador
@@ -108,27 +117,8 @@ class PostsTopicFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        // Accedemos al repositorio de topics con un context seguro
-        context?.let { it ->
-            PostsRepo.getPosts(topicId, it.applicationContext,
-                {
-                    // Rellenamos el ViewHolder con la lista de topics
-                    (listPosts.adapter as PostsAdapter).setPosts(it)
-                },
-                {
-                    // Mostramos indicacion de que algo no fue bien
-                    val message =
-                        if (it.messageResId != null)
-                            getString(it.messageResId)
-                        else if (it.message != null)
-                            it.message
-                        else
-                            getString(R.string.error_default)
-
-                    Snackbar.make(container, message, Snackbar.LENGTH_LONG).show()
-                }
-            )
-        }
+        // Cargamos los posts
+        loadPosts()
     }
 
     // Desliga el fragmento de su actividad
@@ -149,5 +139,40 @@ class PostsTopicFragment: Fragment() {
             R.id.action_reply -> this.topicInteractionListener?.onReplyTopic(topicId, topicTitle)
         }
         return super.onOptionsItemSelected(item)
+    }
+
+
+    /**
+     * PRIVATE FUNCTIONS
+     */
+
+    private fun loadPosts() {
+        // Accedemos al repositorio de posts con un context seguro
+        context?.let { it ->
+            PostsRepo.getPosts(topicId, it.applicationContext,
+                {
+                    // Rellenamos el ViewHolder con la lista de topics
+                    (listPosts.adapter as PostsAdapter).setPosts(it)
+                    swipeRefreshLayout!!.isRefreshing = false
+                },
+                {
+                    // Mostramos indicacion de que algo no fue bien
+                    val message =
+                        when {
+                            it.messageResId != null -> {
+                                getString(it.messageResId)
+                            }
+                            it.message != null -> {
+                                it.message
+                            }
+                            else ->
+                                getString(R.string.error_default)
+                        }
+
+                    Snackbar.make(container, message, Snackbar.LENGTH_LONG).show()
+                    swipeRefreshLayout!!.isRefreshing = false
+                }
+            )
+        }
     }
 }

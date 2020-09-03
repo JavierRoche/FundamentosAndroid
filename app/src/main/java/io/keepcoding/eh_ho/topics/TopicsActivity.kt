@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import io.keepcoding.eh_ho.*
 import io.keepcoding.eh_ho.data.Topic
-import io.keepcoding.eh_ho.data.UserRepo
+import io.keepcoding.eh_ho.data.repos.UserRepo
 import io.keepcoding.eh_ho.login.LoginActivity
 import io.keepcoding.eh_ho.posts.EXTRA_TOPIC_ID
 import io.keepcoding.eh_ho.posts.EXTRA_TOPIC_TITLE
@@ -26,6 +26,7 @@ class TopicsActivity : AppCompatActivity(), TopicsFragment.TopicsInteractionList
     override fun onCreate(savedInstanceState: Bundle?) {
         // Al crearse la actividad llamamos al creador padre
         super.onCreate(savedInstanceState)
+
         // Indicamos cual es el fichero xml que manejara la actividad
         setContentView(R.layout.activity_topics)
 

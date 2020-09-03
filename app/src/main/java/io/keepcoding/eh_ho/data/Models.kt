@@ -4,6 +4,11 @@ import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * TOPIC DATA MODEL
+ */
+
+// Modelo de datos para un Topic
 data class Topic(
     val id: String = UUID.randomUUID().toString(),
     val title: String = "",
@@ -13,17 +18,22 @@ data class Topic(
     val views: Int = 0
 ) {
 
-    // Añadimos un metodo que convierta objetos de JSON a Topic
     // Los metodos aqui incluidos estan declarados en un contexto estatico
     companion object {
+        
+        // Metodo que transforma una lista de JSONObject recibido de un API en un modelo de datos Topic
         fun parseTopicsList(response: JSONObject): List<Topic> {
+            // Accedemos al objeto que internamente contiene un array de elementos con .getJSONObject
             val objectList = response.getJSONObject("topic_list")
-                // Accedemos al array de topics con ...
+                // Accedemos al array de elementos con .getJSONArray
                 .getJSONArray("topics")
 
+            // Definimos la lista mutable del modelo de datos
             val topics = mutableListOf<Topic>()
-            // Iteramos los topics
+            
+            // Iteramos los topics del array
             for (i in 0 until objectList.length()) {
+                // Parseamos cada elemento al modelo de datos y lo añadimos a la lista mutable
                 val parsedTopic = parseTopic(objectList.getJSONObject(i))
                 topics.add(parsedTopic)
             }
@@ -31,14 +41,14 @@ data class Topic(
             return topics
         }
 
-        fun parseTopic(jsonObject: JSONObject): Topic {
-            // La fecha recuperada en "created_at" viene como 2020-06-21T00:00:00:000Z
-            // Para pasarla a nuestro formato necesitamos lo siguiente:
-            val date = jsonObject.getString("created_at")
-                .replace("Z", "+0000")
+        // Metodo que transforma cada JSONObject que se esta iterando en un modelo de datos Topic
+        private fun parseTopic(jsonObject: JSONObject): Topic {
+            // La fecha recuperada en "created_at" llega en un formato (2020-06-21T00:00:00:000Z) que necesitamos transformar
+            val date = jsonObject.getString("created_at").replace("Z", "+0000")
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
             val dateFormatted = dateFormat.parse(date) ?: Date()
 
+            // Devolvemos el modelo de datos del topic con los datos extraidos del JSONObject
             return Topic(
                 id = jsonObject.getInt("id").toString(),
                 title = jsonObject.getString("title"),
@@ -50,25 +60,29 @@ data class Topic(
     }
 
     // Constantes de referencia equivalentes. La L transforma el Int en Long para que no se desborde a partir del año
-    val MINUTE_MILLIS = 1000L * 60
-    val HOUR_MILLIS = MINUTE_MILLIS * 60
-    val DAY_MILLIS = HOUR_MILLIS * 24
-    val MONTH_MILLIS = DAY_MILLIS * 30
-    val YEAR_MILLIS = MONTH_MILLIS * 12
+    private val MINUTE_MILLIS = 1000L * 60
+    private val HOUR_MILLIS = MINUTE_MILLIS * 60
+    private val DAY_MILLIS = HOUR_MILLIS * 24
+    private val MONTH_MILLIS = DAY_MILLIS * 30
+    private val YEAR_MILLIS = MONTH_MILLIS * 12
 
-    // Esta clase nos sirve para devolver la tupla de informacion que devolvera el metodo getTimeOffSet
-    data class TimeOffSet(val amount: Int, val unit: Int)
+    // Este modelo de datos sera devuelto por el metodo getTimeOffSet
+    data class TimeOffSet(
+        val amount: Int, 
+        val unit: Int
+    )
 
-    // Metodo que nos devolvera la diferencia en tiempo con la fecha actual
     /**
      * Fecha de creación de topico '01/01/2020 10:00:00'
-     * @param Date Fecha de consulta '01/01/2020 11:00:00'
-     * @return { unit: "Hora", amount: 1 }
+     * param:  Fecha de consulta '01/01/2020 11:00:00'
+     * return: { unit: amount: 1, "Hora" }
      **/
-    fun getTimeOffSet(dateToCompare: Date = Date()) : TimeOffSet {
-        // Necesitamos la fecha en milisegundos de la consulta
+
+    // Metodo que nos devolvera la diferencia en tiempo con la fecha actual
+    fun getTimeOffSet(dateToCompare: Date = Date()): TimeOffSet {
+        // Fecha del instante de la consulta en milisegundos
         val current = dateToCompare.time
-        // La diferencia entre la current y la fecha del topic
+        // Diferencia entre la current y la fecha del topic en milisegundos
         val diff = current - this.date.time
 
         // Valoramos si hay años de diferencia
@@ -106,28 +120,39 @@ data class Topic(
             Calendar.MINUTE
         )
 
+        // Ni siquiera hay minutos de diferencia
         return TimeOffSet(0, Calendar.MINUTE)
     }
 }
 
 
+/**
+ * POST DATA MODEL
+ */
+
+// Modelo de datos para un Post
 data class Post(
     val author: String,
     val content: String,
-    val postDate: Date = Date()
+    val postDate: String
 ){
 
-    // Añadimos un metodo que convierta objetos de JSON a Post
     // Los metodos aqui incluidos estan declarados en un contexto estatico
     companion object {
+
+        // Metodo que transforma una lista de JSONObject recibido de un API en un modelo de datos Post
         fun parsePostsList(response: JSONObject): List<Post> {
+            // Accedemos al objeto que internamente contiene un array de elementos con .getJSONObject
             val objectList = response.getJSONObject("post_stream")
-                // Accedemos al array de topics con ...
+                // Accedemos al array de elementos con .getJSONArray
                 .getJSONArray("posts")
 
+            // Definimos la lista mutable del modelo de datos
             val posts = mutableListOf<Post>()
-            // Iteramos los topics
+
+            // Iteramos los posts del array
             for (i in 0 until objectList.length()) {
+                // Parseamos cada elemento al modelo de datos y lo añadimos a la lista mutable
                 val parsedPost = parsePost(objectList.getJSONObject(i))
                 posts.add(parsedPost)
             }
@@ -135,18 +160,22 @@ data class Post(
             return posts
         }
 
-        fun parsePost(jsonObject: JSONObject): Post {
-            // La fecha recuperada en "created_at" viene como 2020-06-21T00:00:00:000Z
-            // Para pasarla a nuestro formato necesitamos lo siguiente:
+        // Metodo que transforma cada JSONObject que se esta iterando en un modelo de datos Post
+        private fun parsePost(jsonObject: JSONObject): Post {
+            // La fecha recuperada en "created_at" llega en un formato (2020-06-21T00:00:00:000Z) que necesitamos transformar
             val date = jsonObject.getString("created_at")
                 .replace("Z", "+0000")
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
             val dateFormatted = dateFormat.parse(date) ?: Date()
+            // Damos a la fecha un formato mas friendly
+            val dateCleanFormat = SimpleDateFormat("EEE, d MMM yyyy HH:mm", Locale.getDefault())
+            val dateCleanFormatted = dateCleanFormat.format(dateFormatted)
 
+            // Devolvemos el modelo de datos del post con los datos extraidos del JSONObject
             return Post(
                 author = jsonObject.getString("username").toString(),
                 content = jsonObject.getString("cooked").toString(),
-                postDate = Date()
+                postDate = dateCleanFormatted
             )
         }
     }

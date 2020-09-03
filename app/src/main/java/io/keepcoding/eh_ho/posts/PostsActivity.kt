@@ -11,6 +11,7 @@ const val TRANSACTION_ADD_POST = "add_post"
 
 class PostsActivity: AppCompatActivity(), PostsTopicFragment.TopicInteractionListener,
                                           ReplyPostFragment.ReplyPostInteractionListener {
+
     /**
      * LIFE CYCLE
      */
@@ -52,5 +53,4 @@ class PostsActivity: AppCompatActivity(), PostsTopicFragment.TopicInteractionLis
         // Conseguimos que al darle a enviar el post y crearse volvamos al topic, quitando de la pila el fragmento de creacion
         supportFragmentManager.popBackStack()
     }
-
 }
